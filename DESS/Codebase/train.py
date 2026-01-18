@@ -29,7 +29,9 @@ warnings.filterwarnings("ignore")
 class D2E2S_Trainer(BaseTrainer):
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
-        self._tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v2-xxlarge")
+        # Use pretrained_deberta_name from args
+        model_name = getattr(args, 'pretrained_deberta_name', 'microsoft/deberta-v2-xxlarge')
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._predictions_path = os.path.join(
             self._log_path_predict, "predicted_%s_epoch_%s.json"
         )
@@ -85,7 +87,7 @@ class D2E2S_Trainer(BaseTrainer):
         test_dataset = input_reader.get_dataset(test_label)
 
         # load model
-        config = AutoConfig.from_pretrained("microsoft/deberta-v2-xxlarge")
+        config = AutoConfig.from_pretrained(self.args.pretrained_deberta_name)
 
         model = D2E2SModel.from_pretrained(
             self.args.pretrained_deberta_name,
