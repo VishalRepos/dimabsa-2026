@@ -43,32 +43,35 @@ class Evaluator:
     def eval_batch(self, batch_entity_clf: torch.tensor, batch_senti_clf: torch.tensor,
                    batch_rels: torch.tensor, batch: dict):
         batch_size = batch_senti_clf.shape[0]
-        senti_class_count = batch_senti_clf.shape[2]
+        senti_class_count = batch_senti_clf.shape[2]  # For VA: this is 2 (valence, arousal)
 
         # get maximum activation (index of predicted entity type)
         batch_entity_types = batch_entity_clf.argmax(dim=-1)
         # apply entity sample mask
         batch_entity_types *= batch['entity_sample_masks'].long()
 
-        batch_senti_clf = batch_senti_clf.view(batch_size, -1)
-
-        # apply threshold to sentiments
-        if self._sen_filter_threshold > 0:
-            batch_senti_clf[batch_senti_clf < self._sen_filter_threshold] = 0
-
+        # For VA regression: batch_senti_clf shape is [batch, pairs, 2]
+        # We need to determine which pairs are valid (non-zero VA predictions)
         for i in range(batch_size):
             # get model predictions for sample
-            senti_clf = batch_senti_clf[i]
             entity_types = batch_entity_types[i]
-
-            # get predicted sentiment labels and corresponding entity pairs
-            senti_nonzero = senti_clf.nonzero().view(-1)
-            senti_scores = senti_clf[senti_nonzero]
-
-            senti_types = (senti_nonzero % senti_class_count) + 1  # model does not predict None class (+1)
-            senti_indices = senti_nonzero // senti_class_count
-
+            
+            # For VA regression: get all pairs with non-zero predictions
+            # Use magnitude of VA vector as confidence score
+            senti_va_scores = batch_senti_clf[i]  # [pairs, 2]
+            senti_magnitudes = torch.norm(senti_va_scores, dim=-1)  # [pairs]
+            
+            # Filter pairs with magnitude above threshold
+            threshold = self._sen_filter_threshold if self._sen_filter_threshold > 0 else 0.1
+            valid_senti_mask = senti_magnitudes > threshold
+            senti_indices = valid_senti_mask.nonzero().view(-1)
+            
+            if len(senti_indices) == 0:
+                continue
+                
             rels = batch_rels[i][senti_indices]
+            senti_va_pairs = senti_va_scores[senti_indices]  # [N, 2]
+            senti_scores = senti_magnitudes[senti_indices]  # [N]
 
             # get masks of entities in sentiment
             senti_entity_spans = batch['entity_spans'][i][rels].long()
@@ -78,8 +81,8 @@ class Evaluator:
             if rels.shape[0] != 0:
                 senti_entity_types = torch.stack([entity_types[rels[j]] for j in range(rels.shape[0])])
 
-            # convert predicted sentiments for evaluation
-            sample_pred_sentiments = self._convert_pred_sentiments(senti_types, senti_entity_spans,
+            # convert predicted sentiments for evaluation (pass VA scores)
+            sample_pred_sentiments = self._convert_pred_sentiments(senti_va_pairs, senti_entity_spans,
                                                                  senti_entity_types, senti_scores)
 
             # get entities that are not classified as 'None'
@@ -117,8 +120,18 @@ class Evaluator:
         check = set()
 
         for i in range(pred_senti_types.shape[0]):
-            label_idx = pred_senti_types[i].item()
-            pred_senti_type = self._input_reader.get_sentiment_type(label_idx)
+            # For VA regression: pred_senti_types is [N, 2] with VA scores
+            va_scores = pred_senti_types[i]  # [2] tensor with [valence, arousal]
+            valence, arousal = va_scores[0].item(), va_scores[1].item()
+            
+            # Create a sentiment type string in format "V.VV#A.AA"
+            va_string = f"{valence:.2f}#{arousal:.2f}"
+            
+            # Create a dummy sentiment type object
+            from trainer.entities import sentimentType
+            pred_senti_type = sentimentType(va_string, 1, va_string, va_string, symmetric=False)
+            pred_senti_type.va_scores = [valence, arousal]
+            
             pred_head_type_idx, pred_tail_type_idx = pred_entity_types[i][0].item(), pred_entity_types[i][1].item()
             pred_head_type = self._input_reader.get_entity_type(pred_head_type_idx)
             pred_tail_type = self._input_reader.get_entity_type(pred_tail_type_idx)
