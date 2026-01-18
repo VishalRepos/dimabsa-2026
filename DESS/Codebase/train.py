@@ -116,7 +116,7 @@ class D2E2S_Trainer(BaseTrainer):
 
         # create loss function
         entity_criterion = torch.nn.CrossEntropyLoss(reduction="none")
-        senti_criterion = torch.nn.BCEWithLogitsLoss(reduction="none")
+        senti_criterion = torch.nn.MSELoss(reduction="none")  # For VA regression
         compute_loss = D2E2SLoss(
             senti_criterion,
             entity_criterion,
