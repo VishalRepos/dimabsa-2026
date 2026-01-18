@@ -385,6 +385,7 @@ class D2E2SModel(PreTrainedModel):
 
     def log_sample_total(self, neg_entity_count_all):
         log_path = os.path.join("./log/Sample/", "countSample.txt")
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
         with open(log_path, mode="a", encoding="utf-8") as f:
             f.write("neg_entity_count_all: \n")
             self.neg_span_all += len(neg_entity_count_all)
