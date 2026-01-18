@@ -144,6 +144,36 @@ class D2E2S_Trainer(BaseTrainer):
             # eval validation sets
             if not args.final_eval or (epoch == args.epochs - 1):
                 self._eval(model, test_dataset, input_reader, epoch + 1, updates_epoch, optimizer=optimizer)
+        
+        # Save final model
+        print(f"\n{'='*60}")
+        print("SAVING FINAL MODEL")
+        print(f"{'='*60}")
+        final_save_path = os.path.join(args.save_path, args.dataset, "final_model")
+        os.makedirs(final_save_path, exist_ok=True)
+        
+        if hasattr(model, 'module'):
+            model.module.save_pretrained(final_save_path)
+        else:
+            model.save_pretrained(final_save_path)
+        
+        self._tokenizer.save_pretrained(final_save_path)
+        
+        # Save training info
+        import json
+        info = {
+            'dataset': args.dataset,
+            'epochs': args.epochs,
+            'batch_size': args.batch_size,
+            'model': args.pretrained_deberta_name,
+            'best_f1': self.max_pair_f1
+        }
+        with open(os.path.join(final_save_path, 'training_info.json'), 'w') as f:
+            json.dump(info, f, indent=2)
+        
+        print(f"✓ Model saved to: {os.path.abspath(final_save_path)}")
+        print(f"✓ Best F1 score: {self.max_pair_f1:.2f}%")
+        print(f"{'='*60}\n")
 
     def train_epoch(
         self,
