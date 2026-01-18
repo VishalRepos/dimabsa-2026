@@ -125,13 +125,14 @@ def train_create_sample(sen,neg_entity_count: int, neg_senti_count: int, max_spa
     neg_senti_spans = random.sample(neg_senti_spans, min(len(neg_senti_spans), neg_senti_count))
     neg_rels = [(pos_entity_spans.index(s1), pos_entity_spans.index(s2)) for s1, s2 in neg_senti_spans]
     neg_senti_masks = [create_senti_mask(*spans, context_size) for spans in neg_senti_spans]
-    neg_senti_types = [0] * len(neg_senti_spans)
-
+    # For VA regression: negative samples have VA scores of [0.0, 0.0]
+    neg_senti_types = [[0.0, 0.0]] * len(neg_senti_spans)
 
 
 
     rels = pos_rels + neg_rels
-    senti_types = [r.index for r in pos_senti_types] + neg_senti_types
+    # For VA regression: use VA scores directly instead of indices
+    senti_types = [r.va_scores if hasattr(r, 'va_scores') and r.va_scores else [0.0, 0.0] for r in pos_senti_types] + neg_senti_types
     senti_masks = pos_senti_masks + neg_senti_masks
     assert len(entity_masks) == len(entity_sizes) == len(entity_types) == len(entity_start_masks) == len(entity_end_masks)
     assert len(rels) == len(senti_masks) == len(senti_types)
@@ -145,24 +146,20 @@ def train_create_sample(sen,neg_entity_count: int, neg_senti_count: int, max_spa
     if rels:
         rels = torch.tensor(rels, dtype=torch.long)
         senti_masks = torch.stack(senti_masks)
-        senti_types = torch.tensor(senti_types, dtype=torch.long)
+        senti_types = torch.tensor(senti_types, dtype=torch.float32)  # VA scores as float
         senti_sample_masks = torch.ones([rels.shape[0]], dtype=torch.bool)
     else:
         # corner case handling (no pos/neg sentiments)
         rels = torch.zeros([1, 2], dtype=torch.long)
-        senti_types = torch.zeros([1], dtype=torch.long)
+        senti_types = torch.zeros([1, 2], dtype=torch.float32)  # VA scores [0.0, 0.0]
         senti_masks = torch.zeros([1, context_size], dtype=torch.bool)
         senti_sample_masks = torch.zeros([1], dtype=torch.bool)
 
-    # sentiment types to one-hot encoding
-    senti_types_onehot = torch.zeros([senti_types.shape[0], senti_type_count], dtype=torch.float32)
-    senti_types_onehot.scatter_(1, senti_types.unsqueeze(1), 1)
-    senti_types_onehot = senti_types_onehot[:, 1:]  # all zeros for 'none' sentiment
-
+    # For VA regression: senti_types is already [N, 2] with VA scores, no need for one-hot encoding
     return dict(encodings=encodings, context_masks=context_masks, entity_masks=entity_masks,
                 entity_start_masks = entity_start_masks,entity_end_masks = entity_end_masks,
                 entity_sizes=entity_sizes, entity_types=entity_types,
-                rels=rels, senti_masks=senti_masks, senti_types=senti_types_onehot,
+                rels=rels, senti_masks=senti_masks, senti_types=senti_types,
                 entity_sample_masks=entity_sample_masks, senti_sample_masks=senti_sample_masks,
                 adj = adj)
 

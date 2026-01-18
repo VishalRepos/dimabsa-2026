@@ -24,12 +24,18 @@ class D2E2SLoss():
 
         if senti_count.item() != 0:
             # For VA regression: senti_logits shape [batch, pairs, 2], senti_types shape [batch, pairs, 2]
-            senti_logits = senti_logits.view(-1, 2)  # [N, 2] where N = batch * pairs
-            senti_types = senti_types.view(-1, 2)    # [N, 2]
+            # Only compute loss for valid sentiment pairs (where mask is True)
+            batch_size, num_pairs = senti_logits.shape[0], senti_logits.shape[1]
             
-            # MSE loss for VA regression
-            senti_loss = self._senti_criterion(senti_logits, senti_types)
-            senti_loss = (senti_loss.mean(dim=-1) * senti_sample_masks).sum() / senti_count
+            senti_logits = senti_logits.view(-1, 2)  # [batch*pairs, 2]
+            senti_types = senti_types.view(-1, 2)    # [batch*pairs, 2]
+            
+            # MSE loss for VA regression - compute per sample
+            senti_loss = self._senti_criterion(senti_logits, senti_types)  # [batch*pairs, 2]
+            senti_loss = senti_loss.mean(dim=-1)  # [batch*pairs] - average over V and A
+            
+            # Apply mask and normalize
+            senti_loss = (senti_loss * senti_sample_masks).sum() / senti_count
 
             train_loss = entity_loss + senti_loss + 10*batch_loss
         else:
