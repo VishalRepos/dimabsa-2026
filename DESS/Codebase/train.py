@@ -94,6 +94,7 @@ class D2E2S_Trainer(BaseTrainer):
             sentiment_types=input_reader.sentiment_type_count - 1,
             entity_types=input_reader.entity_type_count,
             args=args,
+            ignore_mismatched_sizes=True,  # For VA regression (2 outputs instead of 3)
         )
         model.to(args.device)
         # create optimizer
