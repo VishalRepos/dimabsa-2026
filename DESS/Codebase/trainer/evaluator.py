@@ -314,10 +314,11 @@ class Evaluator:
                     pred_flat.append(1)
                     types.add(pred_senti)
         
+        metrics = self._compute_metrics(gt_flat, pred_flat, types, print_results)
+        
         if print_results:
             print(f"\nEpoch Results - Precision: {metrics[0]:.2f}%, Recall: {metrics[1]:.2f}%, F1: {metrics[2]:.2f}%")
-
-        metrics = self._compute_metrics(gt_flat, pred_flat, types, print_results)
+        
         return metrics
 
     def _compute_metrics(self, gt_all, pred_all, types, print_results: bool = False):
