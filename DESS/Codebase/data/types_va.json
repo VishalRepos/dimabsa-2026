@@ -1,0 +1,19 @@
+{
+  "entities": {
+    "target": {
+      "short": "T",
+      "verbose": "Target/Aspect"
+    },
+    "opinion": {
+      "short": "O",
+      "verbose": "Opinion"
+    }
+  },
+  "sentiment": {
+    "VA": {
+      "short": "VA",
+      "verbose": "Valence-Arousal",
+      "symmetric": false
+    }
+  }
+}
