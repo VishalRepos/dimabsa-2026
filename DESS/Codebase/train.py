@@ -131,14 +131,18 @@ class D2E2S_Trainer(BaseTrainer):
 
         # train
         for epoch in range(args.epochs):
+            print(f"\n{'='*60}")
+            print(f"EPOCH {epoch + 1}/{args.epochs}")
+            print(f"{'='*60}")
+            
             # train epoch
             self.train_epoch(
                 model, compute_loss, optimizer, train_dataset, updates_epoch, epoch
             )
+            print(f"Training completed for epoch {epoch + 1}")
 
             # eval validation sets
             if not args.final_eval or (epoch == args.epochs - 1):
-                # print(epoch)
                 self._eval(model, test_dataset, input_reader, epoch + 1, updates_epoch, optimizer=optimizer)
 
     def train_epoch(
@@ -166,7 +170,7 @@ class D2E2S_Trainer(BaseTrainer):
 
         iteration = 0
         total = dataset.sentence_count // self.args.batch_size
-        for batch in tqdm(data_loader, total=total, desc="Train epoch %s" % epoch):
+        for batch in tqdm(data_loader, total=total, desc="Train epoch %s" % epoch, disable=True):
             model.train()
             batch = util.to_device(batch, arg_parser.device)
 
@@ -272,7 +276,7 @@ class D2E2S_Trainer(BaseTrainer):
             # iterate batches
             total = math.ceil(dataset.sentence_count / self.args.batch_size)
             for batch in tqdm(
-                data_loader, total=total, desc="Evaluate epoch %s" % epoch
+                data_loader, total=total, desc="Evaluate epoch %s" % epoch, disable=True
             ):
                 # move batch to selected device
                 batch = util.to_device(batch, self.args.device)

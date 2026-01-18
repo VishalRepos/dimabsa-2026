@@ -83,11 +83,6 @@ class Evaluator:
                 # convert predicted sentiments for evaluation (pass VA scores)
                 sample_pred_sentiments = self._convert_pred_sentiments(senti_va_pairs, senti_entity_spans,
                                                                      senti_entity_types, senti_scores)
-            
-            # DEBUG: Print first sample predictions
-            if i == 0 and len(sample_pred_sentiments) > 0:
-                print(f"DEBUG eval_batch: Sample 0 has {len(sample_pred_sentiments)} predictions")
-                print(f"DEBUG eval_batch: First prediction: {sample_pred_sentiments[0]}")
 
             # get entities that are not classified as 'None'
             valid_entity_indices = entity_types.nonzero().view(-1)
@@ -176,45 +171,19 @@ class Evaluator:
             self._gt_sentiments.append(sample_gt_sentiments)
 
     def compute_scores(self):
-        print("Evaluation")
-        print(f"DEBUG: Total GT samples: {len(self._gt_sentiments)}")
-        print(f"DEBUG: Total Pred samples: {len(self._pred_sentiments)}")
+        print("\n" + "="*60)
+        print(f"EVALUATION - Epoch Complete")
+        print("="*60)
         
-        # Count non-empty samples
-        gt_non_empty = sum(1 for s in self._gt_sentiments if len(s) > 0)
-        pred_non_empty = sum(1 for s in self._pred_sentiments if len(s) > 0)
-        print(f"DEBUG: GT non-empty samples: {gt_non_empty}")
-        print(f"DEBUG: Pred non-empty samples: {pred_non_empty}")
-        
-        # Show sample GT and Pred
-        if len(self._gt_sentiments) > 0 and len(self._gt_sentiments[0]) > 0:
-            print(f"DEBUG: Sample GT: {self._gt_sentiments[0][0]}")
-        if len(self._pred_sentiments) > 0 and len(self._pred_sentiments[0]) > 0:
-            print(f"DEBUG: Sample Pred: {self._pred_sentiments[0][0]}")
-        
-        #
-        print("")
-        print("---Aspect(Opinion) Term Extraction---")
-        print("")
         gt, pred = self._convert_by_setting(self._gt_entities, self._pred_entities, include_entity_types=True)
-        ner_eval = self._score(gt, pred, print_results=True)
+        ner_eval = self._score(gt, pred, print_results=False)
 
-        print("")
-        print("--- Aspect Sentiment Triplet Extraction ---")
-        print("")
         gt, pred = self._convert_by_setting(self._gt_sentiments, self._pred_sentiments, include_entity_types=False)
-        print(f"DEBUG: After convert - GT samples: {len(gt)}, Pred samples: {len(pred)}")
-        if len(gt) > 0:
-            print(f"DEBUG: GT[0] length: {len(gt[0])}, sample: {gt[0][:2] if len(gt[0]) > 0 else 'empty'}")
-        if len(pred) > 0:
-            print(f"DEBUG: Pred[0] length: {len(pred[0])}, sample: {pred[0][:2] if len(pred[0]) > 0 else 'empty'}")
-        senti_eval = self._score(gt, pred, print_results=True)
+        senti_eval = self._score(gt, pred, print_results=False)
 
-        print("")
-        print("---A sentiment is considered correct if the sentiment type and the two related entities are predicted correctly (in span and entity type)---")
-        print("")
         gt, pred = self._convert_by_setting(self._gt_sentiments, self._pred_sentiments, include_entity_types=True)
         senti_nec_eval = self._score(gt, pred, print_results=True)
+        
         return ner_eval, senti_eval, senti_nec_eval
         # return ner_eval, senti_eval
 
@@ -346,12 +315,7 @@ class Evaluator:
                     types.add(pred_senti)
         
         if print_results:
-            print(f"DEBUG _score: Total GT items: {total_gt}, Total Pred items: {total_pred}, Matches: {total_matches}")
-            print(f"DEBUG _score: gt_flat length: {len(gt_flat)}, pred_flat length: {len(pred_flat)}")
-            print(f"DEBUG _score: types count: {len(types)}")
-            if len(gt_flat) > 0:
-                print(f"DEBUG _score: gt_flat sample: {gt_flat[:5]}")
-                print(f"DEBUG _score: pred_flat sample: {pred_flat[:5]}")
+            print(f"\nEpoch Results - Precision: {metrics[0]:.2f}%, Recall: {metrics[1]:.2f}%, F1: {metrics[2]:.2f}%")
 
         metrics = self._compute_metrics(gt_flat, pred_flat, types, print_results)
         return metrics
