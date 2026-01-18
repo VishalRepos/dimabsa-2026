@@ -127,7 +127,7 @@ class D2E2S_Trainer(BaseTrainer):
         )
         # eval validation set
         if args.init_eval:
-            self._eval(model, test_dataset, input_reader, 0, updates_epoch)
+            self._eval(model, test_dataset, input_reader, 0, updates_epoch, optimizer=optimizer)
 
         # train
         for epoch in range(args.epochs):
@@ -139,7 +139,7 @@ class D2E2S_Trainer(BaseTrainer):
             # eval validation sets
             if not args.final_eval or (epoch == args.epochs - 1):
                 # print(epoch)
-                self._eval(model, test_dataset, input_reader, epoch + 1, updates_epoch)
+                self._eval(model, test_dataset, input_reader, epoch + 1, updates_epoch, optimizer=optimizer)
 
     def train_epoch(
         self,
@@ -241,6 +241,7 @@ class D2E2S_Trainer(BaseTrainer):
         epoch: int = 0,
         updates_epoch: int = 0,
         iteration: int = 0,
+        optimizer: optimizer = None,
     ):
 
         # create evaluator
@@ -293,7 +294,7 @@ class D2E2S_Trainer(BaseTrainer):
             global_iteration = epoch * updates_epoch + iteration
             ner_eval, senti_eval, senti_nec_eval = evaluator.compute_scores()
             # print(self.result_path)
-            self._log_filter_file(ner_eval, senti_eval, evaluator, epoch)
+            self._log_filter_file(ner_eval, senti_eval, evaluator, epoch, model, optimizer)
         self._log_eval(
             *ner_eval,
             *senti_eval,
@@ -304,7 +305,7 @@ class D2E2S_Trainer(BaseTrainer):
             dataset.label
         )
 
-    def _log_filter_file(self, ner_eval, senti_eval, evaluator, epoch):
+    def _log_filter_file(self, ner_eval, senti_eval, evaluator, epoch, model=None, optimizer=None):
         f1 = float(senti_eval[2])
         if self.max_pair_f1 < f1:
             columns = [
@@ -356,6 +357,17 @@ class D2E2S_Trainer(BaseTrainer):
 
             if self.args.store_examples:
                 evaluator.store_examples()
+            
+            # Save best model
+            if model is not None:
+                extra = {
+                    'epoch': epoch,
+                    'f1': f1,
+                    'ner_eval': ner_eval,
+                    'senti_eval': senti_eval
+                }
+                self._save_best(model, self._tokenizer, optimizer, epoch, 
+                               label=self.args.dataset, extra=extra)
 
     def _get_optimizer_params(self, model):
         param_optimizer = list(model.named_parameters())
