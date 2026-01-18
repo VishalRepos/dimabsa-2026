@@ -1,0 +1,10 @@
+project: my-awesome-kernel
+kernel_slug: uom239364u/my-awesome-kernel
+code_file: kaggle_training_final.ipynb
+accelerator: none
+internet: false
+privacy: private
+datasets: []
+competitions: []
+outputs:
+  download_to: .kaggle-outputs/

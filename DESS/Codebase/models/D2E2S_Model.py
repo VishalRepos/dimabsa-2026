@@ -61,10 +61,11 @@ class D2E2SModel(PreTrainedModel):
         self.deberta_feature_dim = self.args.deberta_feature_dim
         self.gcn_dim = self.args.gcn_dim
         self.gcn_dropout = self.args.gcn_dropout
+        self.pretrained_deberta_name = getattr(args, 'pretrained_deberta_name', 'microsoft/deberta-v3-base')
 
         # 2、DEBERT model
         self.deberta = AutoModel.from_pretrained(
-            "microsoft/deberta-v2-xxlarge", config=config
+            self.pretrained_deberta_name, config=config
         )
 
         # self.BertAdapterModel = BertAdapterModel(config)
