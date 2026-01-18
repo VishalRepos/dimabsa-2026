@@ -83,6 +83,11 @@ class Evaluator:
                 # convert predicted sentiments for evaluation (pass VA scores)
                 sample_pred_sentiments = self._convert_pred_sentiments(senti_va_pairs, senti_entity_spans,
                                                                      senti_entity_types, senti_scores)
+            
+            # DEBUG: Print first sample predictions
+            if i == 0 and len(sample_pred_sentiments) > 0:
+                print(f"DEBUG eval_batch: Sample 0 has {len(sample_pred_sentiments)} predictions")
+                print(f"DEBUG eval_batch: First prediction: {sample_pred_sentiments[0]}")
 
             # get entities that are not classified as 'None'
             valid_entity_indices = entity_types.nonzero().view(-1)
@@ -172,6 +177,21 @@ class Evaluator:
 
     def compute_scores(self):
         print("Evaluation")
+        print(f"DEBUG: Total GT samples: {len(self._gt_sentiments)}")
+        print(f"DEBUG: Total Pred samples: {len(self._pred_sentiments)}")
+        
+        # Count non-empty samples
+        gt_non_empty = sum(1 for s in self._gt_sentiments if len(s) > 0)
+        pred_non_empty = sum(1 for s in self._pred_sentiments if len(s) > 0)
+        print(f"DEBUG: GT non-empty samples: {gt_non_empty}")
+        print(f"DEBUG: Pred non-empty samples: {pred_non_empty}")
+        
+        # Show sample GT and Pred
+        if len(self._gt_sentiments) > 0 and len(self._gt_sentiments[0]) > 0:
+            print(f"DEBUG: Sample GT: {self._gt_sentiments[0][0]}")
+        if len(self._pred_sentiments) > 0 and len(self._pred_sentiments[0]) > 0:
+            print(f"DEBUG: Sample Pred: {self._pred_sentiments[0][0]}")
+        
         #
         print("")
         print("---Aspect(Opinion) Term Extraction---")
@@ -183,6 +203,11 @@ class Evaluator:
         print("--- Aspect Sentiment Triplet Extraction ---")
         print("")
         gt, pred = self._convert_by_setting(self._gt_sentiments, self._pred_sentiments, include_entity_types=False)
+        print(f"DEBUG: After convert - GT samples: {len(gt)}, Pred samples: {len(pred)}")
+        if len(gt) > 0:
+            print(f"DEBUG: GT[0] length: {len(gt[0])}, sample: {gt[0][:2] if len(gt[0]) > 0 else 'empty'}")
+        if len(pred) > 0:
+            print(f"DEBUG: Pred[0] length: {len(pred[0])}, sample: {pred[0][:2] if len(pred[0]) > 0 else 'empty'}")
         senti_eval = self._score(gt, pred, print_results=True)
 
         print("")
@@ -259,8 +284,15 @@ class Evaluator:
         
         # For VA regression: use tolerance-based matching
         va_tolerance = 1.0  # Allow ±1.0 difference in VA scores
+        
+        total_matches = 0
+        total_gt = 0
+        total_pred = 0
 
         for (sample_gt, sample_pred) in zip(gt, pred):
+            total_gt += len(sample_gt)
+            total_pred += len(sample_pred)
+            
             # For VA regression: match based on entity spans, not exact VA scores
             matched_gt = set()
             matched_pred = set()
@@ -299,6 +331,7 @@ class Evaluator:
                     gt_flat.append(gt_senti.index if hasattr(gt_senti, 'index') else 1)
                     pred_flat.append(1)  # Matched
                     types.add(gt_senti)
+                    total_matches += 1
                 else:
                     gt_flat.append(gt_senti.index if hasattr(gt_senti, 'index') else 1)
                     pred_flat.append(0)  # Not matched
@@ -311,6 +344,14 @@ class Evaluator:
                     gt_flat.append(0)
                     pred_flat.append(1)
                     types.add(pred_senti)
+        
+        if print_results:
+            print(f"DEBUG _score: Total GT items: {total_gt}, Total Pred items: {total_pred}, Matches: {total_matches}")
+            print(f"DEBUG _score: gt_flat length: {len(gt_flat)}, pred_flat length: {len(pred_flat)}")
+            print(f"DEBUG _score: types count: {len(types)}")
+            if len(gt_flat) > 0:
+                print(f"DEBUG _score: gt_flat sample: {gt_flat[:5]}")
+                print(f"DEBUG _score: pred_flat sample: {pred_flat[:5]}")
 
         metrics = self._compute_metrics(gt_flat, pred_flat, types, print_results)
         return metrics
