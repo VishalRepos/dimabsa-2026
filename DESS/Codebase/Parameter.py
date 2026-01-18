@@ -241,7 +241,7 @@ def train_argparser():
     parser.add_argument(
         "--save_path",
         type=str,
-        default="data/save/",
+        default="savemodels/",
         help="Path to directory where model checkpoints are stored",
     )
     parser.add_argument(

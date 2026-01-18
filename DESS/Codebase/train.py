@@ -366,7 +366,7 @@ class D2E2S_Trainer(BaseTrainer):
                     'ner_eval': ner_eval,
                     'senti_eval': senti_eval
                 }
-                self._save_best(model, self._tokenizer, optimizer, epoch, 
+                self._save_best(model, self._tokenizer, optimizer, f1, epoch, 
                                label=self.args.dataset, extra=extra)
 
     def _get_optimizer_params(self, model):
