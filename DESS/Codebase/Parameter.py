@@ -37,7 +37,7 @@ def train_argparser():
         },
         "dimabsa_combined": {
             "train": "./data/dimabsa_combined/train_dep_triple_polarity_result.json",
-            "test": "./data/dimabsa_combined/test_dep_triple_polarity_result.json",
+            "test": "./data/dimabsa_combined/train_dep_triple_polarity_result.json",  # Use train for eval during training
             "types_path": "./data/types_va.json",
         },
     }
