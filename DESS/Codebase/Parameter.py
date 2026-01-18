@@ -57,7 +57,7 @@ def train_argparser():
     )
     ## have to set value as half of `emb_dim` when we biderection lstm we used
     parser.add_argument(
-        "--hidden_dim", type=int, default=768, help="hidden layer dimension."
+        "--hidden_dim", type=int, default=384, help="hidden layer dimension."
     )
     parser.add_argument(
         "--emb_dim", type=int, default=768, help="Word embedding dimension."
