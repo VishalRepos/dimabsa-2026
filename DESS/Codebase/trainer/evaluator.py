@@ -256,26 +256,61 @@ class Evaluator:
         gt_flat = []
         pred_flat = []
         types = set()
+        
+        # For VA regression: use tolerance-based matching
+        va_tolerance = 1.0  # Allow ±1.0 difference in VA scores
 
         for (sample_gt, sample_pred) in zip(gt, pred):
-            union = set()
-            union.update(sample_gt)
-            union.update(sample_pred)
-
-            for s in union:
-                if s in sample_gt:
-                    t = s[2]
-                    gt_flat.append(t.index)
-                    types.add(t)
+            # For VA regression: match based on entity spans, not exact VA scores
+            matched_gt = set()
+            matched_pred = set()
+            
+            for gt_item in sample_gt:
+                # gt_item format: ((head_start, head_end, head_type), (tail_start, tail_end, tail_type), sentiment_type)
+                gt_entities = (gt_item[0], gt_item[1])  # Entity spans and types
+                gt_senti = gt_item[2]  # Sentiment type with VA scores
+                
+                best_match = None
+                best_distance = float('inf')
+                
+                for pred_item in sample_pred:
+                    if pred_item in matched_pred:
+                        continue
+                        
+                    pred_entities = (pred_item[0], pred_item[1])
+                    pred_senti = pred_item[2]
+                    
+                    # Check if entities match
+                    if gt_entities == pred_entities:
+                        # Check VA score distance
+                        if hasattr(gt_senti, 'va_scores') and hasattr(pred_senti, 'va_scores'):
+                            gt_va = gt_senti.va_scores
+                            pred_va = pred_senti.va_scores
+                            distance = abs(gt_va[0] - pred_va[0]) + abs(gt_va[1] - pred_va[1])
+                            
+                            if distance < best_distance and distance <= va_tolerance * 2:  # *2 for both V and A
+                                best_match = pred_item
+                                best_distance = distance
+                
+                # Add to flat lists
+                if best_match:
+                    matched_gt.add(gt_item)
+                    matched_pred.add(best_match)
+                    gt_flat.append(gt_senti.index if hasattr(gt_senti, 'index') else 1)
+                    pred_flat.append(1)  # Matched
+                    types.add(gt_senti)
                 else:
+                    gt_flat.append(gt_senti.index if hasattr(gt_senti, 'index') else 1)
+                    pred_flat.append(0)  # Not matched
+                    types.add(gt_senti)
+            
+            # Add unmatched predictions as false positives
+            for pred_item in sample_pred:
+                if pred_item not in matched_pred:
+                    pred_senti = pred_item[2]
                     gt_flat.append(0)
-
-                if s in sample_pred:
-                    t = s[2]
-                    pred_flat.append(t.index)
-                    types.add(t)
-                else:
-                    pred_flat.append(0)
+                    pred_flat.append(1)
+                    types.add(pred_senti)
 
         metrics = self._compute_metrics(gt_flat, pred_flat, types, print_results)
         return metrics
