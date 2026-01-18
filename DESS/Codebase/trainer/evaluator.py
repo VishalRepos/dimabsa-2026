@@ -66,24 +66,23 @@ class Evaluator:
             valid_senti_mask = senti_magnitudes > threshold
             senti_indices = valid_senti_mask.nonzero().view(-1)
             
-            if len(senti_indices) == 0:
-                continue
-                
-            rels = batch_rels[i][senti_indices]
-            senti_va_pairs = senti_va_scores[senti_indices]  # [N, 2]
-            senti_scores = senti_magnitudes[senti_indices]  # [N]
+            sample_pred_sentiments = []
+            if len(senti_indices) > 0:
+                rels = batch_rels[i][senti_indices]
+                senti_va_pairs = senti_va_scores[senti_indices]  # [N, 2]
+                senti_scores = senti_magnitudes[senti_indices]  # [N]
 
-            # get masks of entities in sentiment
-            senti_entity_spans = batch['entity_spans'][i][rels].long()
+                # get masks of entities in sentiment
+                senti_entity_spans = batch['entity_spans'][i][rels].long()
 
-            # get predicted entity types
-            senti_entity_types = torch.zeros([rels.shape[0], 2])
-            if rels.shape[0] != 0:
-                senti_entity_types = torch.stack([entity_types[rels[j]] for j in range(rels.shape[0])])
+                # get predicted entity types
+                senti_entity_types = torch.zeros([rels.shape[0], 2])
+                if rels.shape[0] != 0:
+                    senti_entity_types = torch.stack([entity_types[rels[j]] for j in range(rels.shape[0])])
 
-            # convert predicted sentiments for evaluation (pass VA scores)
-            sample_pred_sentiments = self._convert_pred_sentiments(senti_va_pairs, senti_entity_spans,
-                                                                 senti_entity_types, senti_scores)
+                # convert predicted sentiments for evaluation (pass VA scores)
+                sample_pred_sentiments = self._convert_pred_sentiments(senti_va_pairs, senti_entity_spans,
+                                                                     senti_entity_types, senti_scores)
 
             # get entities that are not classified as 'None'
             valid_entity_indices = entity_types.nonzero().view(-1)
