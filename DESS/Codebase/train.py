@@ -172,6 +172,20 @@ class D2E2S_Trainer(BaseTrainer):
             json.dump(info, f, indent=2)
         
         print(f"✓ Model saved to: {os.path.abspath(final_save_path)}")
+        
+        # Copy to /kaggle/working for easy access
+        import shutil
+        kaggle_output = "/kaggle/working/trained_model"
+        if os.path.exists("/kaggle/working"):
+            try:
+                if os.path.exists(kaggle_output):
+                    shutil.rmtree(kaggle_output)
+                shutil.copytree(final_save_path, kaggle_output)
+                print(f"✓ Model copied to: {kaggle_output}")
+                print(f"  (Easier to access and download)")
+            except Exception as e:
+                print(f"  Note: Could not copy to /kaggle/working: {e}")
+        
         print(f"✓ Best F1 score: {self.max_pair_f1:.2f}%")
         print(f"{'='*60}\n")
 
