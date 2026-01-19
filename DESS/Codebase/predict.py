@@ -96,6 +96,7 @@ def predict(model, dataset, tokenizer, device, batch_size=4):
     )
     
     predictions = []
+    sample_idx = 0
     
     with torch.no_grad():
         for batch in tqdm(data_loader, desc="Generating predictions"):
@@ -114,17 +115,22 @@ def predict(model, dataset, tokenizer, device, batch_size=4):
             )
             
             # Process predictions for each sample in batch
-            batch_size = entity_clf.shape[0]
-            for i in range(batch_size):
+            batch_size_actual = entity_clf.shape[0]
+            for i in range(batch_size_actual):
+                # Get tokens from dataset
+                sentence = dataset.sentences[sample_idx]
+                tokens = [t.phrase for t in sentence.tokens]
+                
                 sample_pred = process_sample_prediction(
                     entity_clf[i],
                     senti_clf[i],
                     rels[i],
                     batch["entity_spans"][i],
-                    batch["tokens"][i],
+                    tokens,
                     tokenizer
                 )
                 predictions.append(sample_pred)
+                sample_idx += 1
     
     return predictions
 
