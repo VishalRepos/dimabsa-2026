@@ -75,7 +75,7 @@ def parser_getting():
     parser = argparse.ArgumentParser(description='Bidirectional MRC-based sentiment triplet extraction')
     parser.add_argument('--task', type=int, default=3, choices=[2, 3])
     parser.add_argument('--domain', type=str, default='res', choices=['res', 'lap', 'hot', 'fin'])
-    parser.add_argument('--language', type=str, default='eng', choices=['eng', 'zho', 'jpn'])
+    parser.add_argument('--language', type=str, default='eng', choices=['eng'])
 
     parser.add_argument('--data_path', type=str, default="./data/")
     parser.add_argument('--log_path', type=str, default="./log/")
