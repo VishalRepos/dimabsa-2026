@@ -1235,7 +1235,9 @@ def load_train_data_multilingual(args):
             elif 'Triplet' in data:
                 num_aspects = len(data['Triplet'])
                 if num_aspects > max_aspects_found:
-                    max_aspects_found = num_aspects    random.seed(42)
+                    max_aspects_found = num_aspects
+
+    random.seed(42)
     random.shuffle(all_data)
     
     print(f"\n{'='*70}")
