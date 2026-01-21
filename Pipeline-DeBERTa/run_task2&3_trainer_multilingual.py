@@ -1184,7 +1184,39 @@ def load_train_data_multilingual(args):
     # train_data_path, dev_data_path, test_data_path = dataset_path_map[args.domain + '_' + args.language]
 
     train_data_path = args.data_path + args.train_data
-
+    
+    # DEBUG: Log path construction
+    print(f"\n{'='*70}")
+    print(f"DEBUG: Path Construction")
+    print(f"{'='*70}")
+    print(f"args.data_path: '{args.data_path}'")
+    print(f"args.train_data: '{args.train_data}'")
+    print(f"Constructed train_data_path: '{train_data_path}'")
+    print(f"File exists: {os.path.exists(train_data_path)}")
+    
+    # Check if file exists before opening
+    if not os.path.exists(train_data_path):
+        print(f"\n❌ ERROR: Training data file not found!")
+        print(f"Looking for: {train_data_path}")
+        print(f"\nCurrent working directory: {os.getcwd()}")
+        print(f"\nListing data directory contents:")
+        data_dir = os.path.dirname(train_data_path)
+        if os.path.exists(data_dir):
+            print(f"Contents of {data_dir}:")
+            for item in os.listdir(data_dir):
+                print(f"  - {item}")
+        else:
+            print(f"Directory does not exist: {data_dir}")
+            # Try to find where data actually is
+            print(f"\nSearching for data files...")
+            for root, dirs, files in os.walk('.'):
+                if 'eng_restaurant_train_alltasks.jsonl' in files or 'eng_laptop_train_alltasks.jsonl' in files:
+                    print(f"Found data in: {root}")
+                    print(f"Files: {files}")
+        raise FileNotFoundError(f"Training data not found: {train_data_path}")
+    
+    print(f"✓ File found, loading data...")
+    print(f"{'='*70}\n")
     category_dict, category_list = category_map[args.domain]
 
     all_data =[]
