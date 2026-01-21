@@ -795,9 +795,31 @@ def dataset_process(args, datatsets, category_mapping, tokenizer):
     train_dataset_object['max_aspect_num'] = max_aspect_num
     train_dataset_object['max_len'] = max_len
 
+    print('=' * 70)
+    print('DATASET STATISTICS')
+    print('=' * 70)
     print('Max length of training tokens: ', max_tokens_len)
     print('Max length in aspect/opinion: ', max_len)
     print('Maximum aspect/opinion in a single sample: ', max_aspect_num)
+    print()
+    
+    # DEBUG: Check if filtering worked
+    if max_aspect_num > 4:
+        print('⚠️  WARNING: max_aspect_num > 4!')
+        print('   This will cause OOM errors!')
+        print('   Expected: max_aspect_num <= 4 (filtered dataset)')
+        print('   Actual: max_aspect_num =', max_aspect_num)
+        print()
+        print('   Possible causes:')
+        print('   1. Using unfiltered dataset')
+        print('   2. Filtered dataset not created')
+        print('   3. Wrong file path')
+        print('=' * 70)
+    else:
+        print('✓ Dataset properly filtered (max_aspect_num <= 4)')
+        print('✓ Memory usage should be safe')
+        print('=' * 70)
+    
     return train_dataset_object, test_dataset_object
 
 

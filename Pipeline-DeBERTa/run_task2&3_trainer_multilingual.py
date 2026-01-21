@@ -1220,14 +1220,40 @@ def load_train_data_multilingual(args):
     category_dict, category_list = category_map[args.domain]
 
     all_data =[]
-    with open(train_data_path, 'r', encoding='utf-8') as f:
+    max_aspects_found = 0    with open(train_data_path, 'r', encoding='utf-8') as f:
         for line in f:
             data = json.loads(line)
             all_data.append(data)
 
-    random.seed(42)
+            
+            # DEBUG: Track max aspects in loaded data
+            if 'Quadruplet' in data:
+                num_aspects = len(data['Quadruplet'])
+                if num_aspects > max_aspects_found:
+                    max_aspects_found = num_aspects
+            elif 'Triplet' in data:
+                num_aspects = len(data['Triplet'])
+                if num_aspects > max_aspects_found:
+                    max_aspects_found = num_aspects    random.seed(42)
     random.shuffle(all_data)
-
+    
+    print(f"\n{'='*70}")
+    print(f"DATA LOADING VERIFICATION")
+    print(f"{'='*70}")
+    print(f"Total samples loaded: {len(all_data)}")
+    print(f"Max aspects in loaded data: {max_aspects_found}")
+    
+    if max_aspects_found > 4:
+        print(f"\n❌ ERROR: Loaded UNFILTERED data!")
+        print(f"   Expected max aspects: 4")
+        print(f"   Found max aspects: {max_aspects_found}")
+        print(f"   File: {train_data_path}")
+        print(f"\n   This WILL cause OOM!")
+        print(f"   Please use filtered dataset (*_filtered.jsonl)")
+    else:
+        print(f"✓ Loaded FILTERED data correctly")
+        print(f"✓ Max aspects: {max_aspects_found} <= 4")
+    print(f"{'='*70}\n")
     # splitting training dataset for new_training dataset and development data
     total_count = len(all_data)
     train_count = int(total_count * 0.8)
