@@ -54,3 +54,31 @@ temp/
 # Testing outputs
 Testing/*/test_results.json
 savedmodel/
+
+# Large model files
+savedmodel/
+*.safetensors
+*.pth
+*.pt
+*.bin
+model.safetensors
+
+# Large predictions
+*_submission.json
+SubmissionReady/
+
+# Training outputs
+Pipeline-DeBERTa/model/*.pth
+Pipeline-DeBERTa/log/
+Pipeline-DeBERTa/tasks/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
