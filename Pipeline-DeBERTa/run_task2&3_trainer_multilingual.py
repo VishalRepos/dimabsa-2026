@@ -1220,7 +1220,8 @@ def load_train_data_multilingual(args):
     category_dict, category_list = category_map[args.domain]
 
     all_data =[]
-    max_aspects_found = 0    with open(train_data_path, 'r', encoding='utf-8') as f:
+    max_aspects_found = 0
+    with open(train_data_path, 'r', encoding='utf-8') as f:
         for line in f:
             data = json.loads(line)
             all_data.append(data)
