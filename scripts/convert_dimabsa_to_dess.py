@@ -127,6 +127,7 @@ def convert_dataset(input_path: str, output_path: str, use_triplet: bool = False
     print(f"Converted {len(samples)} samples ({skipped} skipped)")
     
     print(f"Writing to {output_path}...")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(samples, f, indent=2, ensure_ascii=False)
     

@@ -1,0 +1,128 @@
+╔══════════════════════════════════════════════════════════════╗
+║          KAGGLE UPLOAD CHECKLIST                             ║
+╚══════════════════════════════════════════════════════════════╝
+
+📦 FILES TO UPLOAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ pipeline-deberta-kaggle.zip (29 KB)
+  Location: /Users/vishal.thenuwara/Documents/MSC/Research/Coding/Competition/DimABSANew/
+  
+□ kaggle_training.ipynb (13 KB) [OPTIONAL]
+  Location: Pipeline-DeBERTa/kaggle_training.ipynb
+
+
+🎯 KAGGLE SETUP STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Upload Dataset
+□ Go to: https://www.kaggle.com/datasets
+□ Click: "New Dataset"
+□ Upload: pipeline-deberta-kaggle.zip
+□ Title: "Pipeline-DeBERTa Code"
+□ Visibility: Private
+□ Click: "Create"
+
+STEP 2: Create Notebook
+□ Go to: https://www.kaggle.com/code
+□ Click: "New Notebook"
+□ Settings → Accelerator → GPU T4 ✓
+□ Add Data → Your Datasets → "Pipeline-DeBERTa Code"
+
+STEP 3: Setup (Copy-Paste to Cell 1)
+□ Extract code:
+  !unzip -q /kaggle/input/pipeline-deberta-code/*.zip -d /kaggle/working/
+  %cd /kaggle/working/Pipeline-DeBERTa
+
+□ Install dependencies:
+  !pip install -q transformers sentencepiece protobuf
+
+□ Download data:
+  !mkdir -p data/track_a/subtask_2/eng
+  !wget -q https://raw.githubusercontent.com/DimABSA/DimABSA2026/main/task-dataset/track_a/subtask_2/eng/eng_restaurant_train_alltasks.jsonl -O data/track_a/subtask_2/eng/eng_restaurant_train_alltasks.jsonl
+  !wget -q https://raw.githubusercontent.com/DimABSA/DimABSA2026/main/task-dataset/track_a/subtask_2/eng/eng_restaurant_dev_task2.jsonl -O data/track_a/subtask_2/eng/eng_restaurant_dev_task2.jsonl
+  !wget -q https://raw.githubusercontent.com/DimABSA/DimABSA2026/main/task-dataset/track_a/subtask_2/eng/eng_laptop_train_alltasks.jsonl -O data/track_a/subtask_2/eng/eng_laptop_train_alltasks.jsonl
+  !wget -q https://raw.githubusercontent.com/DimABSA/DimABSA2026/main/task-dataset/track_a/subtask_2/eng/eng_laptop_dev_task2.jsonl -O data/track_a/subtask_2/eng/eng_laptop_dev_task2.jsonl
+
+STEP 4: Train Restaurant (Cell 2)
+□ Run training command (see QUICK_START_KAGGLE.md)
+□ Wait ~30-45 minutes
+□ Check F1 scores in output
+
+STEP 5: Train Laptop (Cell 3)
+□ Run training command (see QUICK_START_KAGGLE.md)
+□ Wait ~60-90 minutes
+□ Check F1 scores in output
+
+STEP 6: Download Results
+□ Create zip:
+  !zip -r results.zip model/*.pth tasks/subtask_2/*.jsonl log/*.log
+□ Go to: Output tab
+□ Download: results.zip
+
+
+📊 EXPECTED RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Restaurant Domain:
+  ✓ Training: 2,284 samples
+  ✓ Dev: 200 samples
+  ✓ Time: 30-45 minutes
+  ✓ F1: 15-25%
+
+Laptop Domain:
+  ✓ Training: 4,076 samples
+  ✓ Dev: 200 samples
+  ✓ Time: 60-90 minutes
+  ✓ F1: 12-20%
+
+Total Time: ~2-3 hours
+
+
+🐛 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ Out of Memory?
+  → Change --batch_size 8 to --batch_size 4
+
+□ GPU Not Working?
+  → Settings → Accelerator → GPU T4 ✓
+  → Check: !nvidia-smi
+
+□ Import Error?
+  → Re-run: !pip install -q transformers sentencepiece protobuf
+
+□ Data Download Fails?
+  → Check internet connection
+  → Try alternative: !git clone https://github.com/DimABSA/DimABSA2026.git
+
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ QUICK_START_KAGGLE.md - 5-minute guide
+□ KAGGLE_TRAINING_GUIDE.md - Detailed instructions
+□ kaggle_training.ipynb - Full notebook
+□ SETUP_COMPLETE.md - Technical summary
+□ KAGGLE_READY.md - Overview
+
+
+✅ FINAL CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ pipeline-deberta-kaggle.zip exists (29 KB)
+□ Kaggle account ready
+□ GPU quota available
+□ Documentation reviewed
+□ Ready to upload!
+
+
+🎉 YOU'RE ALL SET!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Upload pipeline-deberta-kaggle.zip to Kaggle and start training!
+
+Expected outcome: 15-25% F1 (much better than DESS 8.22%)
+
+Good luck! 🚀
+
