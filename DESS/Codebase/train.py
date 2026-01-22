@@ -86,10 +86,9 @@ class D2E2S_Trainer(BaseTrainer):
         test_dataset = input_reader.get_dataset(test_label)
 
         # load model
-        config = AutoConfig.from_pretrained(self.args.pretrained_deberta_name)
+        config = AutoConfig.from_pretrained(self.args.pretrained_deberta_name, low_cpu_mem_usage=False)
 
-        model = D2E2SModel.from_pretrained(
-            self.args.pretrained_deberta_name,
+        model = D2E2SModel(
             config=config,
             cls_token=self._tokenizer.convert_tokens_to_ids("[CLS]"),
             sentiment_types=input_reader.sentiment_type_count - 1,
