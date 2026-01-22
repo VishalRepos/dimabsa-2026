@@ -65,7 +65,7 @@ class D2E2SModel(PreTrainedModel):
 
         # 2、DEBERT model
         self.deberta = AutoModel.from_pretrained(
-            self.pretrained_deberta_name, config=config
+            self.pretrained_deberta_name, config=config, low_cpu_mem_usage=False
         )
 
         # self.BertAdapterModel = BertAdapterModel(config)
