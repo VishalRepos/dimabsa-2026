@@ -94,7 +94,7 @@ def parser_getting():
 
     # parser.add_argument('--bert_model_type', type=str, default="F:\\myhuggingface\\bert\\bert-base-multilingual-uncased")
     # parser.add_argument('--bert_model_type', type=str, default="bert-base-multilingual-uncased")
-    parser.add_argument('--bert_model_type', type=str, default="bert-base-uncased")
+    parser.add_argument('--bert_model_type', type=str, default="microsoft/deberta-v3-base")
     parser.add_argument('--hidden_size', type=int, default=768)
     parser.add_argument('--inference_beta', type=float, default=0.90)
 
