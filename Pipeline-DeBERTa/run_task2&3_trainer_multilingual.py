@@ -907,6 +907,12 @@ def train(args, train_total_data, test_total_data, inference_dataset, category_m
 
     model = DimABSA(args.hidden_size, args.bert_model_type, len(category_mapping))
     if args.gpu:
+        # Multi-GPU support
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs for training")
+            model = torch.nn.DataParallel(model)
+        else:
+            print(f"Using single GPU for training")
         model = model.cuda()
 
     if args.mode == 'evaluate':
