@@ -6,10 +6,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 import torch
 import transformers
-from torch.optim import optimizer
+from torch.optim import optimizer, AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import AdamW
 from transformers import AutoTokenizer, AutoConfig
 
 from Parameter import train_argparser
