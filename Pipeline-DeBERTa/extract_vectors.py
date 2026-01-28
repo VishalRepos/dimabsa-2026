@@ -164,7 +164,15 @@ if __name__ == "__main__":
     print(f"Loading model from {args.model_path}...")
     model = DimABSA(args.hidden_size, args.bert_model, num_category=13)
     checkpoint = torch.load(args.model_path, map_location=args.device)
-    model.load_state_dict(checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint)
+    
+    # Handle different checkpoint formats
+    if 'net' in checkpoint:
+        model.load_state_dict(checkpoint['net'])
+    elif 'model_state_dict' in checkpoint:
+        model.load_state_dict(checkpoint['model_state_dict'])
+    else:
+        model.load_state_dict(checkpoint)
+    
     model.to(args.device)
     model.eval()
     
