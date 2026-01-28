@@ -21,9 +21,15 @@ class DimABSA(nn.Module):
         self.classifier_valence = nn.Linear(hidden_size, 1)
         self.classifier_arousal = nn.Linear(hidden_size, 1)
 
-    def forward(self, query_tensor, query_mask, query_seg, step):
+    def forward(self, query_tensor, query_mask, query_seg, step, return_vectors=False):
 
         hidden_states = self.bert(query_tensor, attention_mask=query_mask, token_type_ids=query_seg)[0]
+        
+        # Return [CLS] token vectors if requested
+        if return_vectors:
+            cls_vector = hidden_states[:, 0, :]  # [batch_size, hidden_size]
+            return cls_vector
+        
         if step == 'A':
             predict_start = self.classifier_a_start(hidden_states)
             predict_end = self.classifier_a_end(hidden_states)

@@ -158,13 +158,26 @@ python Testing/test_phase1_phase2_combined.py
 
 ## 📝 Documentation
 
-- [KAGGLE_SETUP_GUIDE.md](KAGGLE_SETUP_GUIDE.md) - Detailed Kaggle setup
-- [QUICK_START_KAGGLE.md](QUICK_START_KAGGLE.md) - Quick reference
-- [PHASE1_COMPLETE.md](PHASE1_COMPLETE.md) - Data conversion details
-- [PHASE2_COMPLETE.md](PHASE2_COMPLETE.md) - Model modifications
-- [PHASE3_KAGGLE_READY.md](PHASE3_KAGGLE_READY.md) - Training setup
-- [SUBTASKS_ANALYSIS.md](SUBTASKS_ANALYSIS.md) - Task analysis
-- [DATA_CORRECTION.md](DATA_CORRECTION.md) - Data source verification
+**📁 See [docs/](docs/) folder for complete documentation**
+
+### Quick Links
+- [Competition Overview](docs/00-COMPETITION.md) - Task description and metrics
+- [Data Format](docs/01-DATA_FORMAT.md) - Input/output specifications
+
+### DESS Approach (Primary)
+- [Architecture](docs/02-DESS-ARCHITECTURE.md) - Model design and modifications
+- [Training](docs/03-DESS-TRAINING.md) - How to train
+- [Inference](docs/04-DESS-INFERENCE.md) - How to generate submissions
+
+### Pipeline-DeBERTa Approach (Alternative)
+- [Architecture](docs/05-PIPELINE-ARCHITECTURE.md) - Model design
+- [Training](docs/06-PIPELINE-TRAINING.md) - How to train
+- [Inference](docs/07-PIPELINE-INFERENCE.md) - How to generate submissions
+
+### Comparison
+- [DESS vs Pipeline](docs/08-APPROACH-COMPARISON.md) - Side-by-side comparison
+
+*Old documentation archived in [docs-archive/](docs-archive/)*
 
 ## 🏆 Competition
 
