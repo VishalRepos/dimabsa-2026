@@ -163,17 +163,32 @@ if __name__ == "__main__":
     
     # Load model
     print(f"Loading model from {args.model_path}...")
-    model = DimABSA(args.hidden_size, args.bert_model, num_category=args.num_category)
+    
+    # Load checkpoint first to detect num_category
     checkpoint = torch.load(args.model_path, map_location=args.device)
     
-    # Handle different checkpoint formats
+    # Detect num_category from checkpoint
     if 'net' in checkpoint:
-        model.load_state_dict(checkpoint['net'])
+        state_dict = checkpoint['net']
     elif 'model_state_dict' in checkpoint:
-        model.load_state_dict(checkpoint['model_state_dict'])
+        state_dict = checkpoint['model_state_dict']
     else:
-        model.load_state_dict(checkpoint)
+        state_dict = checkpoint
     
+    # Get num_category from classifier_category.weight shape
+    if 'classifier_category.weight' in state_dict:
+        detected_num_category = state_dict['classifier_category.weight'].shape[0]
+        print(f"Detected num_category from checkpoint: {detected_num_category}")
+        num_category = detected_num_category
+    else:
+        num_category = args.num_category
+        print(f"Using default num_category: {num_category}")
+    
+    # Create model with correct num_category
+    model = DimABSA(args.hidden_size, args.bert_model, num_category=num_category)
+    
+    # Load state dict
+    model.load_state_dict(state_dict)
     model.to(args.device)
     model.eval()
     
