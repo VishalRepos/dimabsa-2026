@@ -1152,7 +1152,7 @@ def load_inference_data(args):
     inference_datasets = []
 
     # train_data_path, dev_data_path, test_data_path = dataset_path_map[args.domain + '_' + args.language]
-    inference_data_path = args.data_path + args.infer_data
+    inference_data_path = args.infer_data if args.infer_data.startswith(("/", "../")) else args.data_path + args.infer_data
     category_dict, category_list = category_map[args.domain]
 
     with open(inference_data_path, 'r', encoding='utf-8') as f:
