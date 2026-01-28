@@ -157,12 +157,13 @@ if __name__ == "__main__":
     parser.add_argument('--output_file', required=True, help='Output JSONL vector file')
     parser.add_argument('--bert_model', default='microsoft/deberta-v3-base')
     parser.add_argument('--hidden_size', type=int, default=768)
+    parser.add_argument('--num_category', type=int, default=30, help='Number of categories (default: 30)')
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     args = parser.parse_args()
     
     # Load model
     print(f"Loading model from {args.model_path}...")
-    model = DimABSA(args.hidden_size, args.bert_model, num_category=13)
+    model = DimABSA(args.hidden_size, args.bert_model, num_category=args.num_category)
     checkpoint = torch.load(args.model_path, map_location=args.device)
     
     # Handle different checkpoint formats
