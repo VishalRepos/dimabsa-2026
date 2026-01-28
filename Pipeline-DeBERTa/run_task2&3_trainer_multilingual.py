@@ -1189,7 +1189,7 @@ def load_train_data_multilingual(args):
 
     # train_data_path, dev_data_path, test_data_path = dataset_path_map[args.domain + '_' + args.language]
 
-    train_data_path = args.data_path + args.train_data
+    train_data_path = args.train_data if args.train_data.startswith(("/", "../")) else args.data_path + args.train_data
     
     # DEBUG: Log path construction
     print(f"\n{'='*70}")
